@@ -91,7 +91,7 @@ pre.code{background:#0f141b;color:#cbd5e1;border-radius:8px;padding:16px;overflo
 th.h{text-align:left;font-size:12px;color:var(--mut);padding:10px 14px;border-bottom:2px solid var(--bd)}td{padding:11px 14px;border-bottom:1px solid var(--bd)}
 .pl{display:inline-block;background:var(--row);border:1px solid var(--bd);border-radius:12px;padding:1px 10px;font-size:12px;margin:2px 4px 2px 0}
 button.pl{cursor:pointer;color:inherit;font-family:inherit}button.pl:hover{border-color:var(--blue);color:var(--blue)}.pl.hit{background:rgba(37,99,235,.15);border-color:var(--blue);color:var(--blue)}.ptabs{display:flex;gap:6px;margin-bottom:10px}.ptabs button{background:none;border:1px solid var(--bd);border-radius:14px;padding:2px 12px;cursor:pointer;font-size:12px}.ptabs button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
-#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:#14202e;color:#fff;padding:10px 18px;border-radius:8px;opacity:0;transition:.3s;z-index:9;border-left:4px solid var(--run);pointer-events:none}#toast.show{opacity:1;transform:translate(-50%,0)}
+#bar{position:fixed;top:0;left:0;height:3px;width:0;background:var(--blue);box-shadow:0 0 8px var(--blue);z-index:20;pointer-events:none}.ld{display:grid;place-items:center;align-content:center;gap:14px;min-height:50vh;color:var(--mut)}.ld .pin{width:56px;height:56px;animation:spin .9s linear infinite}#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:#14202e;color:#fff;padding:10px 18px;border-radius:8px;opacity:0;transition:.3s;z-index:9;border-left:4px solid var(--run);pointer-events:none}#toast.show{opacity:1;transform:translate(-50%,0)}
 a{color:var(--blue)}
 @media(max-width:860px){.hero,.drow,.about{grid-template-columns:1fr}.lane{grid-template-columns:90px 1fr}.yrs{margin-left:100px}#gs{display:none}}
 @media(max-width:720px){#shell{flex-direction:column}#rail{width:auto;flex-direction:row;overflow-x:auto;padding:0 8px;position:static;align-self:stretch;height:auto;overflow-y:visible}.ri{width:68px;flex:none}.ri.on{box-shadow:inset 0 -3px var(--blue)}.lg{padding:8px 12px;flex-direction:row;gap:8px}main{padding:16px 14px}}
@@ -201,7 +201,7 @@ function dags(){
  $('#q').oninput=e=>{q=e.target.value.toLowerCase();const p=e.target.selectionStart;dags();const n=$('#q');n.focus();n.setSelectionRange(p,p)};
  app.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{tag=b.dataset.t;dags()});
 }
-function trig(slug){if(OFF[slug]){toast('Paused: unpause this DAG to trigger a run');return}cur=slug;tab='graph';sel=null;location.hash=slug;setTimeout(()=>trigger(),150)}
+function trig(slug){if(OFF[slug]){toast('Paused: unpause this DAG to trigger a run');return}cur=slug;tab='graph';sel=null;location.hash=slug;setTimeout(()=>trigger(),750)}
 function trigger(){const d=cd();if(!d||busy)return;if(OFF[d.slug]){toast('Paused: unpause this DAG to trigger a run');return}if(tab!='graph'){tab='graph';dag(d)}busy=true;
  toast('Dag run triggered · manual__'+new Date().toISOString().slice(0,19));
  const ns=[...document.querySelectorAll('.node')];ns.forEach(n=>{n.classList.remove('run');n.classList.add('q')});
@@ -259,9 +259,13 @@ const CON=()=>{app.innerHTML=`<h1>Connections</h1><p class="sub">Ways to reach m
 const CRD=()=>{app.innerHTML=`<h1>Assets</h1><p class="sub">Certifications and education that downstream DAGs depend on.</p><div class="tw"><table><thead><tr><th class="h">URI</th><th class="h">Type</th><th class="h">Detail</th><th class="h">State</th></tr></thead><tbody>
 <tr><td class="mono">cert://databricks/data-engineer-professional</td><td>Certification</td><td>Databricks Certified Data Engineer Professional · <a href="https://credentials.databricks.com/53dc9c69-ce6c-494a-9c19-7ec3ba92eb6b" target="_blank" rel="noopener">verify</a></td><td><span class="st">materialized</span></td></tr>
 <tr><td class="mono">cert://gcp/professional-data-engineer</td><td>Certification</td><td>Google Cloud Certified Professional Data Engineer · <a href="https://www.credly.com/badges/c887b9ee-a392-4780-ad8c-08ebfb6dda66" target="_blank" rel="noopener">verify</a></td><td><span class="st">materialized</span></td></tr>
-<tr><td class="mono">edu://cleveland-state/ms-cis</td><td>Education</td><td>M.S. Computer and Information Science, Cleveland State University</td><td><span class="st">materialized</span></td></tr>
-<tr><td class="mono">edu://jntu-hyderabad/btech-cse</td><td>Education</td><td>B.Tech Computer Science &amp; Engineering, JNTU Hyderabad</td><td><span class="st">materialized</span></td></tr></tbody></table></div>`};
-function route(){const r=location.hash.slice(1)||'home',d=D.find(x=>x.slug==r),p=d?'dags':r;
+<tr><td class="mono">edu://cleveland-state/ms-cis</td><td>Education</td><td>M.S. Computer and Information Science, Cleveland State University (2021)</td><td><span class="st">materialized</span></td></tr>
+<tr><td class="mono">edu://jntu-hyderabad/btech-cse</td><td>Education</td><td>B.Tech Computer Science &amp; Engineering, JNTU Hyderabad (2019)</td><td><span class="st">materialized</span></td></tr></tbody></table></div>`};
+let lt;const bar=document.createElement('div');bar.id='bar';document.body.appendChild(bar);
+function route(){clearTimeout(lt);bar.style.transition='none';bar.style.opacity=1;bar.style.width='0';void bar.offsetWidth;bar.style.transition='width .5s ease-out,opacity .3s';bar.style.width='100%';
+ app.innerHTML=`<div class="ld">${document.querySelector('.lg .pin').outerHTML}<span>Loading…</span></div>`;
+ lt=setTimeout(()=>{render();bar.style.opacity=0},500)}
+function render(){const r=location.hash.slice(1)||'home',d=D.find(x=>x.slug==r),p=d?'dags':r;
  document.querySelectorAll('.ri').forEach(b=>b.classList.toggle('on',b.dataset.r==p));
  const nm={home:'Home',dags:'Dags',skills:'Admin / Variables',contact:'Admin / Connections',creds:'Assets'};
  $('#crumb').innerHTML=d?`Dags / <b>${d.id}</b>`:`<b>${nm[r]||'Home'}</b>`;
